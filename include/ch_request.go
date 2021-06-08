@@ -75,11 +75,16 @@ func (cr *ChRequest) GetQueryArgument(key string) string {
 
 			case 0x26: // &
 			    cr.RequestArgsMap[argumentKey] = buffer.String()
+			    argumentKey = ""
 			    buffer.Reset()
 
 			default:
 				buffer.WriteByte(char)
 			}
+		}
+
+		if argumentKey != "" {
+			cr.RequestArgsMap[argumentKey] = buffer.String()
 		}
 	}
 

@@ -98,7 +98,7 @@ func InitialRouters() *include.ChRouters {
 }
 
 /* EventStartup start chainx */
-func EventStartup(addr string, port int) {
+func EventStartup(addr string, port int, portReuse bool) {
 	/* initial goroutine work pool */
 	wp := goroutine.Default()
 	defer wp.Release()
@@ -118,5 +118,5 @@ func EventStartup(addr string, port int) {
 	//}{HowLong: -1, Active: "SYSTEM-chainx", Reason: "out of access"}
 
 	/* initialed, enjoy! TODO REMOVE PORT REUSE BEFORE PRODUCT */
-	log.Fatal(gnet.Serve(chainx, fmt.Sprintf("tcp://%s:%d", addr, port), gnet.WithMulticore(true), gnet.WithTicker(true), gnet.WithReusePort(true)))
+	log.Fatal(gnet.Serve(chainx, fmt.Sprintf("tcp://%s:%d", addr, port), gnet.WithMulticore(true), gnet.WithTicker(true), gnet.WithReusePort(portReuse)))
 }

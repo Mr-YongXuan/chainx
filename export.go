@@ -10,7 +10,7 @@ func GetRoutersMap() *include.ChRouters {
 	return core.InitialRouters()
 }
 
-func StartService(addr string, port int) {
+func StartService(addr string, port int, portReuse bool) {
 	fmt.Printf("ready to listen: http://%s:%d\n", addr, port)
-	core.EventStartup(addr, port)
+	core.EventStartup(addr, port, portReuse)
 }
