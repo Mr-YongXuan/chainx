@@ -74,7 +74,7 @@ func (cs *chainxServer) Tick() (delay time.Duration, action gnet.Action) {
 /* React events trans flow here */
 func (cs *chainxServer) React(frame []byte, c gnet.Conn) (out []byte, action gnet.Action) {
 	/* step:1 -> parse request struct */
-	startTime := time.Now()
+	//startTime := time.Now()
 	_ = cs.pool.Submit(func() {
 		buf, ctl := ChainxTRS(frame)
 		_ = c.AsyncWrite(buf)
@@ -84,11 +84,11 @@ func (cs *chainxServer) React(frame []byte, c gnet.Conn) (out []byte, action gne
 			_ = c.Close()
 		}
 	})
-	fmt.Printf("usage: %dus\n", time.Since(startTime).Microseconds())
+	//fmt.Printf("usage: %dus\n", time.Since(startTime).Microseconds())
 	return
 }
 
-func InitialRouters() *include.ChRouters {
+func ChainxRouters() *include.ChRouters {
 	/* initial routers */
 	cr.Routers = make(map[string]struct {
 		Method  []int

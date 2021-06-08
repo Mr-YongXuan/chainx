@@ -10,7 +10,7 @@ func ChainxTRS(reqBdy []byte) (out []byte, ctl map[string]string) {
 	var curr, prevPos = 0, 0
 	var tmpHeaderKey = "ch_un"
 	chr := include.NewRequest()
-	chr.RequestHeader = make(map[string][]byte)
+	chr.Header = make(map[string][]byte)
 	ctl = make(map[string]string)
 
 	for pos, char := range reqBdy {
@@ -23,32 +23,32 @@ func ChainxTRS(reqBdy []byte) (out []byte, ctl map[string]string) {
 				switch pos {
 				case 3:
 					if lib.ChStr3Cmp(reqBdy, 'G', 'E', 'T', ' ') {
-						chr.RequestMethod = include.ChHttpGet
+						chr.Method = include.ChHttpGet
 
 					} else if lib.ChStr3Cmp(reqBdy, 'P', 'U', 'T', ' ') {
-						chr.RequestMethod = include.ChHttpPut
+						chr.Method = include.ChHttpPut
 
 					}
 
 				case 4:
 					if lib.ChStr4Cmp(reqBdy, 'P', 'O', 'S', 'T', ' ') {
-						chr.RequestMethod = include.ChHttpPost
+						chr.Method = include.ChHttpPost
 
 					} else if lib.ChStr4Cmp(reqBdy, 'H', 'E', 'A', 'D', ' ') {
-						chr.RequestMethod = include.ChHttpHead
+						chr.Method = include.ChHttpHead
 
 					}
 
 				case 7:
 					if lib.ChStr7Cmp(reqBdy, 'O', 'P', 'T', 'I', 'O', 'N', 'S', ' ') {
-						chr.RequestMethod = include.ChHttpOption
+						chr.Method = include.ChHttpOption
 
 					}
 				}
 
 			} else if (char == include.ChStrSpace || char == include.ChStrQry) && curr == 1 {
 				/* try fetch request resource*/
-				chr.RequestResource = reqBdy[prevPos+1 : pos]
+				chr.Resource = reqBdy[prevPos+1 : pos]
 				prevPos = pos
 				if char == include.ChStrQry {
 					curr++
@@ -56,7 +56,7 @@ func ChainxTRS(reqBdy []byte) (out []byte, ctl map[string]string) {
 
 			} else if char == include.ChStrSpace && curr == 2 {
 				/* try fetch query args */
-				chr.RequestArgs = reqBdy[prevPos+1 : pos]
+				chr.Args = reqBdy[prevPos+1 : pos]
 				curr++
 				prevPos = pos
 
@@ -64,9 +64,9 @@ func ChainxTRS(reqBdy []byte) (out []byte, ctl map[string]string) {
 				/* try fetch request http version */
 				var ver = reqBdy[prevPos+1 : pos]
 				if len(ver) == 8 {
-					chr.RequestVersion = ver
+					chr.Version = ver
 				} else {
-					chr.RequestVersion = include.HttpVerUn
+					chr.Version = include.HttpVerUn
 				}
 				curr = 10
 				prevPos = pos + 2
@@ -81,12 +81,12 @@ func ChainxTRS(reqBdy []byte) (out []byte, ctl map[string]string) {
 
 			} else if char == include.ChStrCr && reqBdy[pos+1] == include.ChStrLf {
 				/* header value */
-				chr.RequestHeader[tmpHeaderKey] = reqBdy[prevPos:pos]
+				chr.Header[tmpHeaderKey] = reqBdy[prevPos:pos]
 
 				prevPos = pos + 2
 				if reqBdy[pos+2] == include.ChStrCr && reqBdy[pos+3] == include.ChStrLf {
 					/* request body */
-					chr.RequestBody = reqBdy[pos+4:]
+					chr.Body = reqBdy[pos+4:]
 					break
 				}
 			}
@@ -95,7 +95,8 @@ func ChainxTRS(reqBdy []byte) (out []byte, ctl map[string]string) {
 
 	out = ChainxRSM(chr)
 	/* gen server control */
-	if v, ok := chr.RequestHeader["Connection"]; ok && lib.ChStrCmp(v, include.HttpClose) {
+	if v, ok := chr.Header["Connection"];
+	(ok && lib.ChStrCmp(v, include.HttpClose)) || (!ok && lib.ChStrCmp(chr.Version, include.HttpVer10)) {
 		ctl["conn"] = "close"
 	}
 	return

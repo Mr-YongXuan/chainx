@@ -6,11 +6,27 @@ import (
 	"github.com/Mr-YongXuan/chainx/include"
 )
 
-func GetRoutersMap() *include.ChRouters {
-	return core.InitialRouters()
+type Chainx struct{
+	Addr string
+	Port int
+	PortReuse bool
+	chainxRouter *include.ChRouters
 }
 
-func StartService(addr string, port int, portReuse bool) {
-	fmt.Printf("ready to listen: http://%s:%d\n", addr, port)
-	core.EventStartup(addr, port, portReuse)
+func New(addr string, port int, portReuse bool) *Chainx {
+	return &Chainx{
+		Addr: addr,
+		Port: port,
+		PortReuse: portReuse,
+		chainxRouter: core.ChainxRouters(),
+	}
+}
+
+func (c *Chainx)Add(router string, methods []int, handler func(req *include.ChRequest, res *include.ChResponse) *include.ChResponse) {
+	c.chainxRouter.Add(router, methods, handler)
+}
+
+func (c *Chainx) StartService() {
+	fmt.Printf("ready to listen: http://%s:%d\n", c.Addr, c.Port)
+	core.EventStartup(c.Addr, c.Port, c.PortReuse)
 }

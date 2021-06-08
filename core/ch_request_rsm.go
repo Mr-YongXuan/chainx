@@ -11,15 +11,15 @@ func ChainxRSM(chr *include.ChRequest) (out []byte) {
 	var res = include.NewChResponse()
 	var buffer bytes.Buffer
 	/* router handler */
-	if st, ok := cr.Routers[string(chr.RequestResource)]; ok {
+	if st, ok := cr.Routers[string(chr.Resource)]; ok {
 		/* method allow check */
-		if lib.ChMethodIsApprove(chr.RequestMethod, cr.Routers[string(chr.RequestResource)].Method) {
+		if lib.ChMethodIsApprove(chr.Method, cr.Routers[string(chr.Resource)].Method) {
 			res = st.Handler(chr, include.NewChResponse())
-			lib.BasicResponseHeaders(&buffer, include.HttpVer11, include.St200, len(res.ResponseBody))
+			lib.BasicResponseHeaders(&buffer, include.HttpVer11, include.St200, len(res.Body))
 			/* options approve */
-			if chr.RequestMethod == include.ChHttpOption {
+			if chr.Method == include.ChHttpOption {
 				var tmpOptions string
-				for _, method := range cr.Routers[string(chr.RequestResource)].Method {
+				for _, method := range cr.Routers[string(chr.Resource)].Method {
 					switch method {
 					case include.ChHttpGet:
 						tmpOptions = tmpOptions + "GET, "
@@ -34,29 +34,29 @@ func ChainxRSM(chr *include.ChRequest) (out []byte) {
 						break
 					}
 				}
-				res.ResponseHeaders["Allow"] = tmpOptions + "HEAD, OPTIONS"
+				res.Headers["Allow"] = tmpOptions + "HEAD, OPTIONS"
 			}
 
 		} else {
 			res = include.ChMethodNotAllowed()
-			lib.BasicResponseHeaders(&buffer, include.HttpVer11, include.St405, len(res.ResponseBody))
+			lib.BasicResponseHeaders(&buffer, include.HttpVer11, include.St405, len(res.Body))
 		}
 
 	} else {
 		/* static resource or direct 404 */
 		res = include.ChNotFound()
-		lib.BasicResponseHeaders(&buffer, include.HttpVer11, include.St404, len(res.ResponseBody))
+		lib.BasicResponseHeaders(&buffer, include.HttpVer11, include.St404, len(res.Body))
 	}
 
-	if len(res.ResponseHeaders) != 0 {
-		for headerKey, headerValue := range res.ResponseHeaders {
+	if len(res.Headers) != 0 {
+		for headerKey, headerValue := range res.Headers {
 			buffer.WriteString(headerKey + ": " + headerValue + "\r\n")
 		}
 	}
 
 	buffer.WriteString("\r\n")
-	if chr.RequestMethod != include.ChHttpHead {
-		buffer.Write(res.ResponseBody)
+	if chr.Method != include.ChHttpHead {
+		buffer.Write(res.Body)
 	}
 
 	return buffer.Bytes()

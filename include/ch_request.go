@@ -1,27 +1,30 @@
 package include
 
-import "bytes"
+import (
+	"bytes"
+	"github.com/tidwall/gjson"
+)
 
 type ChRequest struct {
-	RequestMethod   int
-	RequestResource []byte
-	RequestVersion  []byte
-	RequestArgs     []byte
-	RequestArgsMap  map[string]string
-	RequestHeader   map[string][]byte
-	RequestBody     []byte
+	Method   int
+	Resource []byte
+	Version  []byte
+	Args     []byte
+	ArgsMap  map[string]string
+	Header   map[string][]byte
+	Body     []byte
 }
 
 /* NewRequest Request struct build func */
 func NewRequest() *ChRequest {
 	cr := &ChRequest{}
-	cr.RequestHeader = make(map[string][]byte)
+	cr.Header = make(map[string][]byte)
 	return cr
 }
 
 /* GetHeader using the keyword fetch header from headers */
 func (cr *ChRequest) GetHeader(key string) string {
-	if v, ok := cr.RequestHeader[key]; ok {
+	if v, ok := cr.Header[key]; ok {
 		return string(v)
 	}
 	return ""
@@ -29,17 +32,17 @@ func (cr *ChRequest) GetHeader(key string) string {
 
 /* GetData get client request payload */
 func (cr *ChRequest) GetData() string {
-	return string(cr.RequestBody)
+	return string(cr.Body)
 }
 
 /* GetHttpVersion get the client http request version */
 func (cr *ChRequest) GetHttpVersion() string {
-	return string(cr.RequestVersion)
+	return string(cr.Version)
 }
 
 /* GetMethod get the client http request method */
 func (cr *ChRequest) GetMethod() string {
-	switch cr.RequestMethod {
+	switch cr.Method {
 	case ChHttpGet:
 		return "GET"
 
@@ -60,21 +63,21 @@ func (cr *ChRequest) GetMethod() string {
 
 /* GetQueryArgument get the client http request argument */
 func (cr *ChRequest) GetQueryArgument(key string) string {
-	if cr.RequestArgsMap == nil {
+	if cr.ArgsMap == nil {
 		/* initial query argument */
-		cr.RequestArgsMap = make(map[string]string)
+		cr.ArgsMap = make(map[string]string)
 
 		/* parse query argument */
 		var buffer bytes.Buffer
 		var argumentKey string
-		for _, char := range cr.RequestArgs {
+		for _, char := range cr.Args {
 			switch char {
 			case 0x3d: // =
 			    argumentKey = buffer.String()
 			    buffer.Reset()
 
 			case 0x26: // &
-			    cr.RequestArgsMap[argumentKey] = buffer.String()
+			    cr.ArgsMap[argumentKey] = buffer.String()
 			    argumentKey = ""
 			    buffer.Reset()
 
@@ -84,14 +87,24 @@ func (cr *ChRequest) GetQueryArgument(key string) string {
 		}
 
 		if argumentKey != "" {
-			cr.RequestArgsMap[argumentKey] = buffer.String()
+			cr.ArgsMap[argumentKey] = buffer.String()
 		}
 	}
 
-	if v, ok := cr.RequestArgsMap[key]; ok {
+	if v, ok := cr.ArgsMap[key]; ok {
 		return v
 	}
 	return ""
+}
+
+/* GetJson try to fetch json data from request body */
+func (cr *ChRequest) GetJson(path string) (out string, ok bool) {
+	res := gjson.GetBytes(cr.Body, path)
+	ok = res.Exists()
+	if ok {
+		out = res.String()
+	}
+	return
 }
 
 type ChRouters struct {

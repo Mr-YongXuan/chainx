@@ -16,6 +16,8 @@ const (
 	ChStrColon = 0x3a
 )
 
+type JSON map[string]interface{}
+
 var (
 	/* Http versions */
 	HttpVerUn = []byte{0x75, 0x6e, 0x6b, 0x6e, 0x6f, 0x77, 0x6e}       //unknown
@@ -35,8 +37,8 @@ var (
 // ChForbidden return 403 html content
 func ChForbidden() *ChResponse {
 	res := NewChResponse()
-	res.ResponseCode = St404
-	res.ResponseBody = []byte(`
+	res.Code = St404
+	res.Body = []byte(`
 <div style="text-align: center;">
 <h1>403 Forbidden</h1>
 </div>
@@ -51,8 +53,8 @@ chainx
 // ChNotFound return 404 html content
 func ChNotFound() *ChResponse {
 	res := NewChResponse()
-	res.ResponseCode = St404
-	res.ResponseBody = []byte(`
+	res.Code = St404
+	res.Body = []byte(`
 <div style="text-align: center;">
 <h1>404 Not Found</h1>
 </div>
@@ -67,8 +69,8 @@ chainx
 // ChMethodNotAllowed return 405 html content
 func ChMethodNotAllowed() *ChResponse {
 	res := NewChResponse()
-	res.ResponseCode = St404
-	res.ResponseBody = []byte(`
+	res.Code = St404
+	res.Body = []byte(`
 <div style="text-align: center;">
 <h1>405 Method Not Allowed</h1>
 </div>
