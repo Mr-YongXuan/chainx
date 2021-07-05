@@ -29,15 +29,17 @@ var (
 	HttpClose = []byte{0x63, 0x6c, 0x6f, 0x73, 0x65} // close
 
 	/* Http Status Code */
-	St200 = []byte(" 200 OK\r\n")
-	St404 = []byte(" 404 Not Found\r\n")
-	St405 = []byte(" 405 Method Not Allowed\r\n")
+	St200 = []byte(" 200 OK")
+	St403 = []byte(" 403 Forbidden")
+	St404 = []byte(" 404 Not Found")
+	St405 = []byte(" 405 Method Not Allowed")
 )
 
 // ChForbidden return 403 html content
 func ChForbidden() *ChResponse {
 	res := NewChResponse()
-	res.Code = St404
+	res.Code = St403
+	res.Headers["Content-Type"] = "text/html"
 	res.Body = []byte(`
 <div style="text-align: center;">
 <h1>403 Forbidden</h1>
@@ -54,6 +56,7 @@ chainx
 func ChNotFound() *ChResponse {
 	res := NewChResponse()
 	res.Code = St404
+	res.Headers["Content-Type"] = "text/html"
 	res.Body = []byte(`
 <div style="text-align: center;">
 <h1>404 Not Found</h1>
@@ -69,7 +72,8 @@ chainx
 // ChMethodNotAllowed return 405 html content
 func ChMethodNotAllowed() *ChResponse {
 	res := NewChResponse()
-	res.Code = St404
+	res.Code = St405
+	res.Headers["Content-Type"] = "text/html"
 	res.Body = []byte(`
 <div style="text-align: center;">
 <h1>405 Method Not Allowed</h1>

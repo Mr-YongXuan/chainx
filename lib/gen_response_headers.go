@@ -11,6 +11,7 @@ func BasicResponseHeaders(buffer *bytes.Buffer, httpVer []byte, stCode []byte, b
 	/* gen: response line */
 	buffer.Write(httpVer)
 	buffer.Write(stCode)
+	buffer.Write([]byte("\r\n"))
 
 	/* gen: GMT web server time format */
 	buffer.WriteString("Date: " + time.Now().Format("Mon, 02 Jan 2006 03:04:05 GMT") + "\r\n")

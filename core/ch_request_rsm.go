@@ -4,12 +4,17 @@ import (
 	"bytes"
 	"github.com/Mr-YongXuan/chainx/include"
 	"github.com/Mr-YongXuan/chainx/lib"
+	"time"
 )
+
+var logOut = lib.NewLogsOut()
 
 // ChainxRSM chainx resource manager
 func ChainxRSM(chr *include.ChRequest) (out []byte) {
+	startTime := time.Now()
 	var res = include.NewChResponse()
 	var buffer bytes.Buffer
+	var reStCode = include.St200
 	/* router handler */
 	if st, ok := cr.Routers[string(chr.Resource)]; ok {
 		/* method allow check */
@@ -38,12 +43,14 @@ func ChainxRSM(chr *include.ChRequest) (out []byte) {
 			}
 
 		} else {
+			reStCode = include.St405
 			res = include.ChMethodNotAllowed()
 			lib.BasicResponseHeaders(&buffer, include.HttpVer11, include.St405, len(res.Body))
 		}
 
 	} else {
 		/* static resource or direct 404 */
+		reStCode = include.St404
 		res = include.ChNotFound()
 		lib.BasicResponseHeaders(&buffer, include.HttpVer11, include.St404, len(res.Body))
 	}
@@ -59,5 +66,6 @@ func ChainxRSM(chr *include.ChRequest) (out []byte) {
 		buffer.Write(res.Body)
 	}
 
+	logOut.AccessInfo(reStCode, chr.GetMethod(), chr.Resource, time.Since(startTime).Microseconds())
 	return buffer.Bytes()
 }
