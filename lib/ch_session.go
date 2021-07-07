@@ -37,15 +37,20 @@ func NewSessions(defaultExpire int64) *Sessions {
 }
 
 /* Register add user information into sessions table */
-func (s *Sessions) Register (identifier string, res *include.ChResponse, meta interface{}) bool {
+func (s *Sessions) Register (res *include.ChResponse, identifier string, meta interface{}, expires int64) (token string, ok bool) {
 	if identifier != "" {
 		// sum token
 		buffer := bytes.Buffer{}
 		buffer.WriteString(identifier)
 		buffer.WriteString(strconv.Itoa(time.Now().Nanosecond()))
 		buffer.WriteString(strconv.Itoa(rand.Intn(90000)))
-		token := fmt.Sprintf("%x", sha1.Sum(buffer.Bytes()))
-		expires := time.Now().Unix() + s.DefaultExpire
+		token = fmt.Sprintf("%x", sha1.Sum(buffer.Bytes()))
+		var currentExpires int64
+		if expires == 0 {
+			currentExpires = time.Now().Unix() + s.DefaultExpire
+		} else {
+			currentExpires = time.Now().Unix() + expires
+		}
 
 		s.protect.Lock()
 		//register to sessions table
@@ -53,17 +58,18 @@ func (s *Sessions) Register (identifier string, res *include.ChResponse, meta in
 			Data   interface{}
 			Expire int64
 			token  string
-		}{Data: meta, Expire: expires, token: token}
+		}{Data: meta, Expire: currentExpires, token: token}
 		//register to token map
 		s.TokenMap[token] = identifier
-		cookieExpires := time.Unix(expires, 0).Format("Mon, 02 Jan 2006 03:04:05 GMT")
+		cookieExpires := time.Unix(currentExpires, 0).Format("Mon, 02 Jan 2006 03:04:05 GMT")
 		res.Headers["Set-Cookie"] = fmt.Sprintf("ChainxSession=%s; expires=%s", token, cookieExpires)
 		s.protect.Unlock()
-		return true
+		ok = true
 
 	} else {
-		return false
+		ok = false
 	}
+	return
 }
 
 /* TokenAvailable if token valid and not expired then return true */

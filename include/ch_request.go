@@ -98,12 +98,8 @@ func (cr *ChRequest) GetQueryArgument(key string) string {
 }
 
 /* GetJson try to fetch json data from request body */
-func (cr *ChRequest) GetJson(path string) (out string, ok bool) {
-	res := gjson.GetBytes(cr.Body, path)
-	ok = res.Exists()
-	if ok {
-		out = res.String()
-	}
+func (cr *ChRequest) GetJson(path string) (res gjson.Result) {
+	res = gjson.GetBytes(cr.Body, path)
 	return
 }
 
