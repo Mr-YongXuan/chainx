@@ -5,12 +5,14 @@ import (
 	"time"
 )
 
+var TermLogger = true
+
 type LogsOut struct {
-	ChainxRunning bool
+	ChainxRunning    bool
 	AccessInfoBuffer chan string
 }
 
-func NewLogsOut () *LogsOut {
+func NewLogsOut() *LogsOut {
 	to := &LogsOut{
 		ChainxRunning: true,
 	}
@@ -36,5 +38,7 @@ func (to *LogsOut) programLogsOutput() {
 
 /* AccessInfo append a new log into output queue */
 func (to *LogsOut) AccessInfo(stCode []byte, method string, resource []byte, usages int64) {
-	to.AccessInfoBuffer <- fmt.Sprintf("-> %s -> %s -> %s -> %dμs", stCode, method, resource, usages)
+	if TermLogger {
+		to.AccessInfoBuffer <- fmt.Sprintf("-> %s -> %s -> %s -> %dμs", stCode, method, resource, usages)
+	}
 }
