@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/Mr-YongXuan/chainx/include"
 	"github.com/panjf2000/gnet"
-	"github.com/panjf2000/gnet/pool/goroutine"
+	"github.com/panjf2000/gnet/pkg/pool/goroutine"
 	"log"
 	"strings"
 	"sync"
