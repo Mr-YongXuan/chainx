@@ -1,5 +1,4 @@
 # chainx
-I am the author Zhiqiang(YongXuan Tu)<br />
 enjoy your web server~
 
 # Installation
